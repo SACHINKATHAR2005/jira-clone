@@ -25,8 +25,8 @@ router.put("/update", isAdminorTeam, updateOrganization);
 router.delete("/delete", deleteOrganization);
 
 
-router.get("/all", getAllOrganization);
-
+router.get("/all",isAdminorTeam ,getAllOrganization);
+// /org/all
 
 router.get("/:id", getSingleOrganization);
 

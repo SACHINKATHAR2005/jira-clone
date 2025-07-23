@@ -22,10 +22,12 @@ const userSchema = new mongoose.Schema({
         enum:["user","team-lead","admin"],
         default:"user"
     },
-    organization: {
+    organization:[ {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Organization"
-    },
+        ref: "Organization",
+        default: null 
+    }],
+    projectIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }],
     avtar:{
         type:String,
         default:""

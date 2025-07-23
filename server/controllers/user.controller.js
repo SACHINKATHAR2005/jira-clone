@@ -24,7 +24,8 @@ export const registerUser = async(req,res)=>{
             name,
             email,
             password:hashPassword,
-            role :role || "user"
+            role :role || "user",
+           
         })
         
         await newUser.save();
@@ -92,7 +93,11 @@ export const loginUser = async(req,res)=>{
             data:{
                 name:existUser.name,
                 email:existUser.email,
-                role:existUser.role
+                role:existUser.role,
+                orgId:existUser.organization,
+                projectId:existUser.projectIds,
+                avtar:existUser.avtar,
+                isVerified :existUser.isVerified,
             }
 
         })
@@ -129,7 +134,7 @@ export const logoutUser = async(req,res)=>{
 
 export const getAllUser = async(req,res)=>{
     try {
-        const users = await User.find({}).select("id name email role organization isVerified");
+        const users = await User.find({}).select("id name email role organization isVerified projectIds ");
         return res.status(200).json({
             message:"All users",
             success:true,

@@ -7,7 +7,6 @@ import {User} from "../models/user.model.js"
 
 
 
-
 export const createNewProject = async (req, res) => {
   try {
     const { name, description, organizationId } = req.body;
@@ -19,18 +18,7 @@ export const createNewProject = async (req, res) => {
       });
     }
 
-    const Org = await Organization.findById(organizationId)
-      .populate("createdBy", "name email role")
-      .populate("members", "name email role")
-      .populate({
-        path: "projects",
-        select: "name description createdBy",
-        populate: {
-          path: "createdBy",
-          select: "name email role"
-        }
-      });
-
+    const Org = await Organization.findById(organizationId);
     if (!Org) {
       return res.status(400).json({
         message: "Organization not found",
@@ -38,26 +26,32 @@ export const createNewProject = async (req, res) => {
       });
     }
 
- const newProject = new Project({
-  name,
-  description,
-  organization: organizationId,
-  members: [{
-    user: req.user._id,
-    role: "manager" 
-  }],
-  createdBy: req.user._id,
-});
+    const newProject = new Project({
+      name,
+      description,
+      organization: organizationId,
+      members: [{
+        user: req.user._id,
+        role: "manager"
+      }],
+      createdBy: req.user._id,
+    });
 
     await newProject.save();
 
+    // Add project to Org
     Org.projects.push(newProject._id);
     await Org.save();
 
+    // Add project to user's projectIds
+    await User.findByIdAndUpdate(req.user._id, {
+      $push: { projectIds: newProject._id }
+    });
+
     const populatedProject = await Project.findById(newProject._id)
-      .populate("createdBy", "name email role")
-      .populate("members.user", "name email role")
-      .populate("organization","name _id")
+      .populate("createdBy", "name email role organization isVerified projectIds")
+      .populate("members.user", "name email role organization isVerified projectIds")
+      .populate("organization", "name _id");
 
     return res.status(201).json({
       message: "Project created successfully",
@@ -73,6 +67,11 @@ export const createNewProject = async (req, res) => {
     });
   }
 };
+
+
+
+
+
 export const addnewMemberToProject = async (req, res) => {
   try {
     const { ProjectId, userId, role, OrganizationId } = req.body;
@@ -92,13 +91,9 @@ export const addnewMemberToProject = async (req, res) => {
       });
     }
 
-    // If members are stored as array of { user, role }
-const isUserInOrg = organization.members?.some(
-  (member) => member?._id?.toString() === userId
-);
-
-
-
+    const isUserInOrg = organization.members?.some(
+      (member) => member?._id?.toString() === userId
+    );
 
     if (!isUserInOrg) {
       return res.status(400).json({
@@ -115,7 +110,6 @@ const isUserInOrg = organization.members?.some(
       });
     }
 
-    // ✅ Fix: Check from project.members, not user.members
     const isUserExist = project.members.some(
       (member) => member.user.toString() === userId
     );
@@ -127,17 +121,18 @@ const isUserInOrg = organization.members?.some(
       });
     }
 
-    // Push the new member
-    project.members.push({
-      user: userId,
-      role: role || "developer",
-    });
-
+    // Add user to project
+    project.members.push({ user: userId, role: role || "developer" });
     await project.save();
 
+    // Also add project ID to user model
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { projectIds: ProjectId }
+    });
+
     const populatedProject = await Project.findById(ProjectId)
-      .populate("members.user", "name email role")
-      .populate("createdBy", "name email role");
+      .populate("members.user", "name email role organization isVerified projectIds")
+      .populate("createdBy", "name email role organization isVerified projectIds");
 
     return res.status(200).json({
       message: "Member added successfully",
@@ -153,6 +148,7 @@ const isUserInOrg = organization.members?.some(
     });
   }
 };
+
 
 export const removeMemberFromProject = async(req,res)=>{
     try {
@@ -194,8 +190,8 @@ export const removeMemberFromProject = async(req,res)=>{
         await project.save();
 
         const populatedProject = await Project.findById(ProjectId)
-        .populate("members.user", "name email role")
-        .populate("createdBy", "name email role");
+        .populate("members.user", "name email role organization isVerified projectIds")
+        .populate("createdBy", "name email role organization isVerified projectIds");
         return res.status(200).json({
             message:"Member removed successfully",
             success:true,
@@ -244,8 +240,8 @@ export const updateProjectDetails = async(req,res)=>{
         await Project.findByIdAndUpdate(id, updateProject, { new: true });
 
         const populatedProject = await Project.findById(id)
-        .populate("members.user", "name email role")
-        .populate("createdBy", "name email role");
+        .populate("members.user", "name email role organization isVerified projectIds")
+        .populate("createdBy", "name email role organization isVerified projectIds");
         return res.status(200).json({
             message:"Project updated successfully",
             success:true,
@@ -317,9 +313,9 @@ export const getAllProjects = async(req,res)=>{
           const {orgId} = req.params;
     try {
         const getAllProjects = await Project.find({organization:orgId})
-        .populate("createdBy","name email role")
-        .populate("organization", 'name  ')
-        .populate("members.user", "name email role")
+        .populate("createdBy","name email role organization isVerified projectIds")
+        .populate("organization", 'name _id  ')
+        .populate("members.user", "name email role organization isVerified projectIds")
 
         
 
@@ -342,9 +338,9 @@ export const getSingleProject = async (req,res)=>{
     try {
         const {id} = req.params;
         const singleProject = await Project.findById(id)
-        .populate("createdBy","name email role")
-        .populate("organization", 'name  ')
-        .populate("members.user", "name email role")
+        .populate("createdBy","name email role organization isVerified projectIds")
+        .populate("organization", 'name _id ')
+        .populate("members.user", "name email role organization isVerified projectIds")
 
         if(!singleProject){
             return res.status(404).json({
