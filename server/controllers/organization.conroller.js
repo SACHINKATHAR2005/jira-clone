@@ -197,16 +197,17 @@ export const removeMember = async (req, res) => {
 
 export const updateOrganization = async(req,res)=>{
   try {
-    const {organizationId,name,description} = req.body;
+    const {name,description} = req.body;
+    const id = req.params.id;
     
-    if(!organizationId || !name || !description){
+    if(!id || !name || !description){
       return res.status(400).json({
         message:"Please provide organization id, name and description",
         success:false
 
       })
     } 
-    const organization = await Organization.findById(organizationId);
+    const organization = await Organization.findById(id);
     if(!organization){
       return res.status(404).json({
         message:"Organization not found",
@@ -222,7 +223,7 @@ export const updateOrganization = async(req,res)=>{
     organization.description = updateData.description;
     await organization.save();
 
-      const upadtedOrg = await Organization.findById(organizationId)
+      const upadtedOrg = await Organization.findById(id)
       .populate("createdBy", "name email role organization isVerified projectIds")
       .populate("members", "name email role organization isVerified projectIds");
 
@@ -243,14 +244,14 @@ export const updateOrganization = async(req,res)=>{
 
 export const deleteOrganization = async(req,res)=>{
   try {
-    const {OrganizationId} = req.body;
-    if(!OrganizationId){
+    const {id} = req.params;
+    if(id){
       return res.status(400).json({
         message:"Please provide organization id",
         success:false
       })
     }
-    const organization = await Organization.findById(OrganizationId);
+    const organization = await Organization.findById(id);
     if(!organization){
       return res.status(404).json({
         message:"Organization id is not valid !",

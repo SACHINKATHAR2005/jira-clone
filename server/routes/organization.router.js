@@ -12,22 +12,26 @@ router.use(auth);
 
 router.post("/create", createOrganization);
 
-
+ // https://jira-clone-u2r9.onrender.com/org/create
 router.post("/add-member", isAdminorTeam, addNewMember);
-
-
+ // https://jira-clone-u2r9.onrender.com/org/add-member
 router.post("/remove-member", isAdminorTeam, removeMember);
 
+ // https://jira-clone-u2r9.onrender.com/org/remove-member
 
-router.put("/update", isAdminorTeam, updateOrganization);
+router.put("/update/:id", isAdminorTeam, updateOrganization);
 
+ // https://jira-clone-u2r9.onrender.com/org/update/:id
 
-router.delete("/delete", deleteOrganization);
+router.delete("/delete/id", isAdminorTeam,deleteOrganization);
 
+ // https://jira-clone-u2r9.onrender.com/org/delete/id
 
 router.get("/all",isAdminorTeam ,getAllOrganization);
-// /org/all
+
+ // https://jira-clone-u2r9.onrender.com/org/all
 
 router.get("/:id", getSingleOrganization);
 
+ // https://jira-clone-u2r9.onrender.com/org/:id
 export default router;

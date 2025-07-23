@@ -6,20 +6,20 @@ const router = express.Router();
 
 
 router.post("/create",auth,isAdminorTeam,createNewProject);
-// http://localhost:8000/project/create
+//  https://jira-clone-u2r9.onrender.com/project/create
 
 router.post("/add-member",auth,isAdminorTeam,addnewMemberToProject);
-// http://localhost:8000/project/add-member
+// https://jira-clone-u2r9.onrender.com/project/add-member
 router.post("/remove-member",auth,isAdminorTeam,removeMemberFromProject);
-//  http://localhost:8000/project/remove-member
+// https://jira-clone-u2r9.onrender.com/project/remove-member
 router.put("/update/:id",auth,isAdminorTeam,updateProjectDetails);
-//  http://localhost:8000/project/update/:id
+//  https://jira-clone-u2r9.onrender.com/project/update/:id
 router.delete("/delete/:id",auth,isAdminorTeam,deleteProject);
-//  http://localhost:8000/project/delete/:id
+//  https://jira-clone-u2r9.onrender.com/project/delete/:id
 router.get("/get-all/:orgId",auth,getAllProjects);
-//  http://localhost:8000/project/get-all/:orgId
+//  https://jira-clone-u2r9.onrender.com/project/get-all/:orgId
 router.get("/get/:id",auth,getSingleProject);
-//  http://localhost:8000/project/get/:id
+// https://jira-clone-u2r9.onrender.com/project/get/:id
 
 
 

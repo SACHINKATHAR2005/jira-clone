@@ -7,13 +7,13 @@ const router = express.Router();
 
 
 router.post("/create",auth,isAdminorTeam,addNewTask);
-//   http://localhost:8000/task/create
+//   https://jira-clone-u2r9.onrender.com/task/create
 router.post('/remove',auth,isAdminorTeam,removeTask);
-//   http://localhost:8000/task/remove
+//   https://jira-clone-u2r9.onrender.com/task/remove
 router.put("/update/:id",auth,updateTask);
-// http://localhost:8000/task/update/:id
+// https://jira-clone-u2r9.onrender.com/task/update/:id
 router.get("/get-all/:projectId",auth,getAllTasks);
-// // http://localhost:8000/task/get-all/:projectId
+// //https://jira-clone-u2r9.onrender.com/task/get-all/:projectId
 router.get("/get/:id",auth,getSingleTask);
-// http://localhost:8000/task/get/:id
+//https://jira-clone-u2r9.onrender.com/task/get/:id
 export default router
